@@ -3,6 +3,7 @@ import numpy
 from sklearn import cross_validation
 import sklearn.multiclass
 from sklearn.svm import SVC
+from sklearn.svm import LinearSVC
 from sklearn.preprocessing import LabelEncoder
 import math
 
@@ -40,9 +41,9 @@ if __name__ == '__main__':
 	trainSet = pandas.read_csv("train.csv")
 	trainTargets = LabelEncoder().fit_transform(trainSet['target'])
 	trainFeatures = trainSet.drop('target', axis=1)
-	test = pandas.read_csv("test.csv") 
  	rbf_SVC = SVC(C=1.0, kernel='rbf', gamma=2.0)
 	poly_SVC = SVC(C=1.0, kernel='poly',degree=3)
+	linear_SVC = LinearSVC(C=1.0)
 
 	#p1v1 = onevsone(poly_SVC)
 	#r1v1 = onevsone(rbf_SVC)
@@ -67,5 +68,33 @@ if __name__ == '__main__':
 		print "C: " + str(cVal) + ", Score: " + str(score)
 
 	print "Best C was: " + str(bestC) +", with accuracy: " + str(bestAccuracy)
+
+	print "\n"
+	print "Trying various C values for Linear SVM"
+	bestC = 0.0
+	bestAccuracy = -1.0
+	C =[math.pow(10,i) for i in range(-5,5)]
+	for i in range(len(C)):
+		cVal = C[i]
+		linear_SVC = LinearSVC(C=cVal)
+		score = quickScore(poly_SVC, trainFeatures, trainTargets)
+		if (score > bestAccuracy):
+			bestC = cVal
+			bestAccuracy = score
+		print "C: " + str(cVal) + ", Score: " + str(score)
+
+	print "Best C was: " + str(bestC) +", with accuracy: " + str(bestAccuracy)
+	#model = LinearSVC(C=bestC).fit(trainFeatures, trainTargets)
+	model = LinearSVC(C=bestC).fit(trainFeatures, trainTargets)
+	print "Trained..."
+	test = pandas.read_csv("test.csv") 
+	results = model.decision_function(test)
+	predictions = 1.0 / (1.0 + numpy.exp(-results))
+	row_sums = predictions.sum(axis=1)
+	predictions_normalised = predictions / row_sums[:, numpy.newaxis]
+
+	# create submission file for Kaggle
+	prediction_DF = pandas.DataFrame(predictions_normalised, index=sample_submission.id.values, columns=sample_submission.columns[1:])
+	prediction_DF.to_csv('svc_submission.csv', index_label='id')
 
 
