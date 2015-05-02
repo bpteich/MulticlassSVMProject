@@ -7,7 +7,7 @@ from sklearn.preprocessing import LabelEncoder
 
 
 trainSet = pandas.read_csv("train.csv")
-trainTargets = LabelEncoder().fit_transform(trainingSet['target'])
+trainTargets = LabelEncoder().fit_transform(trainSet['target'])
 trainFeatures = trainSet.drop('target', axis=1)
 
 
