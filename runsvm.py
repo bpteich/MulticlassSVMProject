@@ -15,7 +15,7 @@ import time
 
 '''Returns the average score of the given classifier'''
 def getScore(estimator, trainFeatures, trainTargets):
-	kfold = 5
+	kfold = 10
 	scores = cross_validation.cross_val_score(estimator, trainFeatures, trainTargets, cv=kfold, n_jobs=-1, verbose=0)
 	#print scores
 	return scores.mean(), scores.std()
@@ -58,21 +58,27 @@ if __name__ == '__main__':
 	model = SVC(kernel=clf.best_params_['kernel'], C=clf.best_params_['C'])
 	'''
 
-	'''
-	model = SVC(kernel='rbf', verbose=1)
-	model.fit(trainFeatures, trainTargets)
-	test = pandas.read_csv("test.csv") 
-	results = model.decision_function(test)
-	predictions = 1.0 / (1.0 + numpy.exp(-results))
-	row_sums = predictions.sum(axis=1)
-	predictions_normalised = predictions / row_sums[:, numpy.newaxis]
 
+	model = SVC(C=4, kernel='rbf',gamma=0.000004, verbose=0, probability=True).fit(trainFeatures, trainTargets)
+	print "C = 4, Gamma = 0.000004, # Support Vectors = " + str(model.n_support_)
+
+	'''
+	model = SVC(C=5, kernel='rbf',gamma=0.000004, verbose=0).fit(trainFeatures, trainTargets)
+	print "C = 5, Gamma = 0.000004, # Support Vectors = " + str(model.n_support_)'''
+
+	test = pandas.read_csv("test.csv") 
+	results = model.predict_proba(test)
+	print results[0]
+	#predictions = 1.0 / (1.0 + numpy.exp(-results))
+	#row_sums = predictions.sum(axis=1)
+	#predictions_normalised = predictions / row_sums[:, numpy.newaxis]
+	
 	# create submission file for Kaggle
 	sample_submission = pandas.read_csv("sampleSubmission.csv")
-	print len(predictions_normalised)
-	prediction_DF = pandas.DataFrame(predictions_normalised, index=sample_submission.id.values, columns=sample_submission.columns[1:])
+	prediction_DF = pandas.DataFrame(results, index=sample_submission.id.values, columns=sample_submission.columns[1:])
+	#prediction_DF = pandas.DataFrame(predictions_normalised, index=sample_submission.id.values, columns=sample_submission.columns[1:])
 	prediction_DF.to_csv('svc_submission.csv', index_label='id')
-	'''
+	
 	#p1v1 = onevsone(poly_SVC)
 	#r1v1 = onevsone(rbf_SVC)
 
@@ -83,7 +89,7 @@ if __name__ == '__main__':
 	#print "RBF Kernel 1v1 Results: " + str(result1)
 
 
-
+	'''
 
 	print "Trying various Degrees for Poly SVM"
 	bestD = 0
@@ -125,13 +131,14 @@ if __name__ == '__main__':
 		print "C: " + str(cVal) + ", Score: " + str(score)+", Standard Deviation = " + str(std)+ " Running Time: " + str(elapsedTime)
 	
 	print "Best C was: " + str(bestC) +", with accuracy: " + str(bestAccuracy) +", Standard Deviation: "+str(bstd) + " Running Time: " + str(bestTime)
-
-
+	'''
+	bestG = 0.000004
+	'''
 	print "\n"
 	print "Trying various Gamma values for RBF Kernel"
 	bestG = 0.0
 	bestAccuracy = -1.0
-	G =[math.pow(10,i) for i in range(-5,5)]
+	G =[0.000003, 0.000004, 0.0000045, 0.000005, 0.0000055, 0.000006, 0.000007, 0.00001]
 	bstd = 0
 	for i in range(len(G)):
 		startTime = time.time()
@@ -147,10 +154,11 @@ if __name__ == '__main__':
 		print "Gamma: " + str(gVal) + ", Score: " + str(score) +", Standard Deviation = " + str(std)+ " Running Time: " + str(elapsedTime)
 	elapsedTime = time.time() - startTime
 	print "Best Gamma was: " + str(bestG) +", with accuracy: " + str(bestAccuracy) +", Standard Deviation: "+str(bstd) + " Running Time: " + str(bestTime)
-
-
+	'''
+	'''
 	print "\n"
 	print "Trying various C values for RBF Kernel with Gamma = " + str(bestG)
+	C =[i for i in range(1,10)]
 	bestC = 0.0
 	bestAccuracy = -1.0
 	bstd = 0
@@ -167,13 +175,18 @@ if __name__ == '__main__':
 		print "C: " + str(cVal) + ", Score: " + str(score)+", Standard Deviation = " + str(std)+ " Running Time: " + str(elapsedTime)
 	elapsedTime = time.time() - startTime
 	print "Best C was: " + str(bestC) +", with accuracy: " + str(bestAccuracy) +", Standard Deviation: "+str(bstd) + " Running Time: " + str(bestTime)
+	'''
+
+	bestC = 4
 
 
 
+	'''
 	print "\nTrying various C values for Linear Kernel"
 	bestC = 0.0
 	bestAccuracy = -1.0
 	bstd = 0
+	C =[0.0005, 0.0008, 0.001, 0.003, 0.006, 0.008, 0.01]
 	for i in range(len(C)):
 		startTime = time.time()
 		cVal = C[i]
@@ -189,6 +202,7 @@ if __name__ == '__main__':
 	print "Best C was: " + str(bestC) +", with accuracy: " + str(bestAccuracy) +", Standard Deviation: "+str(bstd) + " Running Time: " + str(bestTime)
 
 	print "Best C was: " + str(bestC) +", with accuracy: " + str(bestAccuracy)
+	'''
 	
 
 
