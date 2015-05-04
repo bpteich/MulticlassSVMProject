@@ -307,8 +307,15 @@ if __name__ == '__main__':
 	trainFeatures = trainSet.drop('target', axis=1)
 	test = pandas.read_csv("test.csv") 
 
+	'''Due to the massive time complexity of some of these operations only uncomment the things you want to run! '''
+
+	###Uncomment this to compare 1v1 and 1va###
 	#compareMultiClass(trainFeatures,trainTargets)
 
+	###Uncomment this to (attempt to) plot the decision Boundaries ###
+	#plot() 
+
+	###Uncomment this to do a sort of repeated linear grid search for parameters. ###
 	search_vals()
 
 
@@ -318,7 +325,7 @@ if __name__ == '__main__':
 
 	#feat_train, feat_test, tar_train, tar_test = cross_validation.train_test_split(trainFeatures, trainTargets, train_size=0.1)
 
-	'''
+	'''#Exhaustive Grid Search
 	parameters = {'kernel':('linear', 'poly', 'rbf'), 'C':(0.0001, 0.1, 1, 5, 10)}
 	svr = SVC()
 	clf = grid_search.GridSearchCV(svr, parameters, n_jobs=4, verbose=1)
